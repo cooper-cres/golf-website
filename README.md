@@ -1,86 +1,589 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Custom Swing</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; }
-    header { display: flex; justify-content: space-between; align-items: center;
-             padding: 1rem 2rem; border-bottom: 4px solid #166534; background: #ecfdf5; }
-    nav button { margin: 0 0.5rem; background: none; border: none; font-size: 1rem;
-                 font-weight: bold; color: #166534; cursor: pointer; }
-    nav button:hover { color: #052e16; }
-    .page { display: none; padding: 2rem; }
-    .active { display: block; }
-    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    .card { background: #fff; border-radius: 1rem; padding: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; }
-    .btn { background: #166534; color: #fff; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; cursor: pointer; }
-    .btn:hover { background: #065f46; }
-    .cart { font-weight: bold; color: #b91c1c; }
-  </style>
-</head>
-<body>
-  <header>
-    <div style="font-size: 1.5rem; font-weight: bold; color:#166534;">Custom Swing</div>
-    <nav>
-      <button onclick="showPage('home')">Home</button>
-      <button onclick="showPage('products')">Products</button>
-      <button onclick="showPage('about')">About</button>
-      <button onclick="showPage('contact')">Contact</button>
-    </nav>
-    <div>🛒 <span id="cart-count" class="cart">0</span></div>
-  </header>
+import { useState } from "react"; 
 
-  <!-- Home -->
-  <div id="home" class="page active">
-    <h1>Custom Clubs, Perfect Swing</h1>
-    <p>At Custom Swing, we craft personalised golf gear that matches your style, power, and precision.</p>
-    <button class="btn" onclick="showPage('products')">Shop Now</button>
-  </div>
+import { ShoppingCart } from "lucide-react"; 
 
-  <!-- Products -->
-  <div id="products" class="page">
-    <h2>Our Products</h2>
-    <div class="product-grid" id="product-list"></div>
-  </div>
+import { Button } from "@/components/ui/button"; 
 
-  <!-- About -->
-  <div id="about" class="page">
-    <h2>About Us</h2>
-    <p>Custom Swing is dedicated to revolutionising golf with tailor-made gear designed to optimise your game.</p>
-  </div>
+import { Card, CardContent } from "@/components/ui/card"; 
 
-  <!-- Contact -->
-  <div id="contact" class="page">
-    <h2>Contact Us</h2>
-    <p>Email us at: support@customswing.com</p>
-  </div>
+ 
 
-  <script>
-    const products = ["Custom Balls","Custom Clubs","Custom Bags","Custom Gloves","Custom Tees","Custom Towels","Custom Hats","Custom Shoes"];
-    const cart = [];
+export default function CustomSwing() { 
 
-    function showPage(page) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(page).classList.add('active');
-    }
+  const [cart, setCart] = useState([]); 
 
-    function addToCart(item) {
-      cart.push(item);
-      document.getElementById("cart-count").innerText = cart.length;
-      alert(item + " added to cart!");
-    }
+  const [page, setPage] = useState("home"); 
 
-    // render products
-    const productList = document.getElementById("product-list");
-    products.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `<h3>${p}</h3><p>High-quality ${p.toLowerCase()}.</p>
-                       <button class="btn" onclick="addToCart('${p}')">Add to Cart</button>`;
-      productList.appendChild(div);
-    });
-  </script>
-</body>
-</html>
+  const [customisation, setCustomisation] = useState({ color: "", text: "", image: null }); 
+
+ 
+
+  const [customer, setCustomer] = useState({ name: "", address: "", city: "", country: "", card: "" }); 
+
+  const [orderNumber, setOrderNumber] = useState(null); 
+
+  const [eta, setEta] = useState(""); 
+
+ 
+
+  const products = [ 
+
+    "Custom Balls", 
+
+    "Custom Clubs", 
+
+    "Custom Bags", 
+
+    "Custom Gloves", 
+
+    "Custom Tees", 
+
+    "Custom Towels", 
+
+    "Custom Hats", 
+
+    "Custom Shoes" 
+
+  ]; 
+
+ 
+
+  const addToCart = (item) => { 
+
+    setCart([...cart, item]); 
+
+    setPage("customise"); 
+
+  }; 
+
+ 
+
+  const handleImageUpload = (e) => { 
+
+    if (e.target.files && e.target.files[0]) { 
+
+      const file = URL.createObjectURL(e.target.files[0]); 
+
+      setCustomisation({ ...customisation, image: file }); 
+
+    } 
+
+  }; 
+
+ 
+
+  const handleCustomerChange = (field, value) => { 
+
+    setCustomer({ ...customer, [field]: value }); 
+
+  }; 
+
+ 
+
+  const generateOrder = () => { 
+
+    const num = "CS" + Math.floor(100000 + Math.random() * 900000); 
+
+    const options = ["3-5 business days", "5-7 business days", "2-4 business days"]; 
+
+    const chosen = options[Math.floor(Math.random() * options.length)]; 
+
+    setOrderNumber(num); 
+
+    setEta(chosen); 
+
+    return { num, chosen }; 
+
+  }; 
+
+ 
+
+  const handleConfirm = (e) => { 
+
+    e.preventDefault(); 
+
+    generateOrder(); 
+
+    setPage("confirmation"); 
+
+  }; 
+
+ 
+
+  const downloadReceipt = () => { 
+
+    const receiptHtml = ` 
+
+      <html> 
+
+        <head> 
+
+          <title>Custom Swing Receipt</title> 
+
+          <style> 
+
+            body { font-family: Arial, sans-serif; padding: 24px; color: #0f5132; } 
+
+            .header { text-align: center; margin-bottom: 16px; } 
+
+            .items { margin-top: 12px; } 
+
+            .items li { margin-bottom: 8px; } 
+
+            .preview { margin-top: 12px; } 
+
+            .meta { margin-top: 12px; } 
+
+          </style> 
+
+        </head> 
+
+        <body> 
+
+          <div class="header"> 
+
+            <h1>Custom Swing</h1> 
+
+            <p>Thank you for your purchase!</p> 
+
+          </div> 
+
+          <div class="meta"> 
+
+            <strong>Order Number:</strong> ${orderNumber || "N/A"}<br /> 
+
+            <strong>Estimated Delivery:</strong> ${eta || "N/A"} 
+
+          </div> 
+
+ 
+
+          <h3>Customer Details</h3> 
+
+          <div> 
+
+            ${customer.name || "-"}<br /> 
+
+            ${customer.address || "-"}<br /> 
+
+            ${customer.city || "-"}<br /> 
+
+            ${customer.country || "-"} 
+
+          </div> 
+
+ 
+
+          <h3>Items</h3> 
+
+          <ul class="items"> 
+
+            ${cart.map((c) => `<li>${c}</li>`).join("")} 
+
+          </ul> 
+
+ 
+
+          ${customisation.image ? `<div class="preview"><h4>Preview Image</h4><img src="${customisation.image}" style="max-width:300px; height:auto; border-radius:8px;"/></div>` : ""} 
+
+ 
+
+          <hr /> 
+
+          <p style="font-size:0.9rem;">This is a mock receipt generated by Custom Swing. Prices shown are examples.</p> 
+
+        </body> 
+
+      </html> 
+
+    `; 
+
+ 
+
+    const w = window.open("", "_blank", "noopener,noreferrer"); 
+
+    if (!w) { alert("Popup blocked. Please allow popups for this site to download the receipt."); return; } 
+
+    w.document.write(receiptHtml); 
+
+    w.document.close(); 
+
+    setTimeout(() => { try { w.focus(); w.print(); } catch (err) { console.error("Print failed:", err); } }, 500); 
+
+  }; 
+
+ 
+
+  return ( 
+
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white"> 
+
+      {/* Banner */} 
+
+      <header className="w-[90%] h-[15vh] mx-auto flex justify-between items-center border-b-4 border-green-600"> 
+
+        <div className="text-4xl font-bold text-green-800">Custom Swing</div> 
+
+        <nav className="flex gap-6 text-xl font-semibold text-green-700"> 
+
+          <button onClick={() => setPage("products")} className="hover:text-green-900">Products</button> 
+
+          <button onClick={() => setPage("about")} className="hover:text-green-900">About Us</button> 
+
+          <button onClick={() => setPage("contact")} className="hover:text-green-900">Contact Us</button> 
+
+        </nav> 
+
+        <div className="relative"> 
+
+          <ShoppingCart className="w-8 h-8 text-green-700 cursor-pointer" onClick={() => setPage("checkout")} /> 
+
+          {cart.length > 0 && ( 
+
+            <div className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 text-sm"> 
+
+              {cart.length} 
+
+            </div> 
+
+          )} 
+
+        </div> 
+
+      </header> 
+
+ 
+
+      {/* Home Page */} 
+
+      {page === "home" && ( 
+
+        <main className="flex justify-center items-center gap-10 p-10"> 
+
+          <div className="w-[35%] h-[40vh] bg-green-200 rounded-2xl shadow-md flex items-center justify-center"> 
+
+            <span className="text-lg text-green-900">[ Image Placeholder ]</span> 
+
+          </div> 
+
+          <div className="w-[55%]"> 
+
+            <h1 className="text-6xl font-bold text-green-800 mb-4">Custom Clubs, Perfect Swing</h1> 
+
+            <p className="text-lg text-gray-700 mb-6">At Custom Swing, we craft personalised golf gear that matches your style, power, and precision. Play your best game with equipment built just for you.</p> 
+
+            <Button onClick={() => setPage("products")} className="bg-green-700 hover:bg-green-800 text-white text-lg px-6 py-3 rounded-2xl shadow-lg"> 
+
+              Shop Now 
+
+            </Button> 
+
+          </div> 
+
+        </main> 
+
+      )} 
+
+ 
+
+      {/* Products Page */} 
+
+      {page === "products" && ( 
+
+        <section className="grid grid-cols-3 gap-6 p-10"> 
+
+          {products.map((product) => ( 
+
+            <Card key={product} className="rounded-2xl shadow-lg hover:scale-105 transition"> 
+
+              <CardContent className="p-6 text-center"> 
+
+                <div className="h-40 bg-green-100 flex items-center justify-center rounded-xl mb-4"> 
+
+                  <span className="text-green-900">{product} Image</span> 
+
+                </div> 
+
+                <h2 className="text-2xl font-semibold text-green-800 mb-2">{product}</h2> 
+
+                <p className="text-gray-600 mb-4">High-quality {product.toLowerCase()} designed for performance and style.</p> 
+
+                <Button onClick={() => addToCart(product)} className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-xl">Add to Cart</Button> 
+
+              </CardContent> 
+
+            </Card> 
+
+          ))} 
+
+        </section> 
+
+      )} 
+
+ 
+
+      {/* Customise Page */} 
+
+      {page === "customise" && ( 
+
+        <section className="p-10"> 
+
+          <h2 className="text-4xl font-bold text-green-800 mb-6">Customise Your Item</h2> 
+
+          <div className="grid grid-cols-2 gap-8"> 
+
+            <div className="bg-green-100 rounded-xl p-6 shadow-md space-y-6"> 
+
+              <div> 
+
+                <p className="text-lg mb-2">Choose Colour</p> 
+
+                <input type="color" className="w-full h-12 cursor-pointer" onChange={(e) => setCustomisation({ ...customisation, color: e.target.value })} /> 
+
+              </div> 
+
+              <div> 
+
+                <p className="text-lg mb-2">Add Text</p> 
+
+                <input type="text" placeholder="Enter text" className="w-full p-3 rounded-xl border" onChange={(e) => setCustomisation({ ...customisation, text: e.target.value })} /> 
+
+              </div> 
+
+              <div> 
+
+                <p className="text-lg mb-2">Upload Photo</p> 
+
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full" /> 
+
+              </div> 
+
+            </div> 
+
+            <div className="flex flex-col justify-center items-start"> 
+
+              <h3 className="text-2xl font-semibold text-green-700 mb-4">Preview</h3> 
+
+              <div className="w-full h-64 bg-green-200 flex flex-col items-center justify-center rounded-xl relative"> 
+
+                {customisation.image ? ( 
+
+                  <img src={customisation.image} alt="Preview" className="absolute inset-0 w-full h-full object-cover rounded-xl" /> 
+
+                ) : ( 
+
+                  <span className="text-green-900">[ Upload Image Preview ]</span> 
+
+                )} 
+
+                {customisation.text && ( 
+
+                  <span className="absolute bottom-4 text-xl font-bold" style={{ color: customisation.color || "black" }}> 
+
+                    {customisation.text} 
+
+                  </span> 
+
+                )} 
+
+              </div> 
+
+              <Button onClick={() => setPage("checkout")} className="mt-6 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-2xl shadow-lg"> 
+
+                Checkout 
+
+              </Button> 
+
+            </div> 
+
+          </div> 
+
+        </section> 
+
+      )} 
+
+ 
+
+      {/* Checkout Page */} 
+
+      {page === "checkout" && ( 
+
+        <section className="p-10"> 
+
+          <h2 className="text-4xl font-bold text-green-800 mb-6">Checkout</h2> 
+
+          <div className="bg-white shadow-xl rounded-2xl p-6 space-y-6"> 
+
+            {cart.map((item, index) => ( 
+
+              <div key={index} className="flex justify-between border-b py-3"> 
+
+                <span className="text-lg text-green-900">{item}</span> 
+
+                <span className="text-gray-600">$199</span> 
+
+              </div> 
+
+            ))} 
+
+            <div className="flex justify-between mt-6 text-xl font-bold"> 
+
+              <span>Total</span> 
+
+              <span>${cart.length * 199}</span> 
+
+            </div> 
+
+ 
+
+            <form className="mt-6 space-y-4" onSubmit={handleConfirm}> 
+
+              <input value={customer.name} onChange={(e) => handleCustomerChange("name", e.target.value)} type="text" placeholder="Full Name" className="w-full p-3 rounded-xl border" /> 
+
+              <input value={customer.address} onChange={(e) => handleCustomerChange("address", e.target.value)} type="text" placeholder="Address" className="w-full p-3 rounded-xl border" /> 
+
+              <input value={customer.city} onChange={(e) => handleCustomerChange("city", e.target.value)} type="text" placeholder="City" className="w-full p-3 rounded-xl border" /> 
+
+              <input value={customer.country} onChange={(e) => handleCustomerChange("country", e.target.value)} type="text" placeholder="Country" className="w-full p-3 rounded-xl border" /> 
+
+              <input value={customer.card} onChange={(e) => handleCustomerChange("card", e.target.value)} type="text" placeholder="Credit Card (Fake)" className="w-full p-3 rounded-xl border" /> 
+
+ 
+
+              <Button type="submit" className="mt-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-2xl shadow-lg w-full"> 
+
+                Confirm Purchase 
+
+              </Button> 
+
+            </form> 
+
+          </div> 
+
+        </section> 
+
+      )} 
+
+ 
+
+      {/* Confirmation Page */} 
+
+      {page === "confirmation" && ( 
+
+        <section className="p-10 text-center"> 
+
+          <h2 className="text-4xl font-bold text-green-800 mb-4">Thanks for buying with us!</h2> 
+
+          <p className="text-lg text-gray-700 mb-2">Your order number is <strong>{orderNumber}</strong></p> 
+
+          <p className="text-lg text-gray-700 mb-6">Estimated delivery: <strong>{eta}</strong></p> 
+
+ 
+
+          <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md"> 
+
+            <h3 className="text-xl font-semibold text-green-800 mb-4">Order Summary</h3> 
+
+            <ul className="text-left"> 
+
+              {cart.map((c, i) => ( 
+
+                <li key={i} className="py-1">{c} - $199</li> 
+
+              ))} 
+
+            </ul> 
+
+ 
+
+            {customisation.image && ( 
+
+              <div className="mt-4"> 
+
+                <h4 className="font-semibold">Your Preview</h4> 
+
+                <img src={customisation.image} alt="Preview" className="mt-2 rounded-md w-full object-cover" /> 
+
+              </div> 
+
+            )} 
+
+ 
+
+            <Button onClick={downloadReceipt} className="mt-6 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-2xl shadow-lg w-full"> 
+
+              Download Receipt (Open Print — Save as PDF) 
+
+            </Button> 
+
+ 
+
+            <Button onClick={() => { setCart([]); setCustomisation({ color: "", text: "", image: null }); setPage("home"); }} className="mt-3 bg-gray-200 text-green-800 px-6 py-3 rounded-2xl w-full"> 
+
+              Back to Home 
+
+            </Button> 
+
+          </div> 
+
+        </section> 
+
+      )} 
+
+ 
+
+      {/* About Page */} 
+
+      {page === "about" && ( 
+
+        <section className="p-10 text-center"> 
+
+          <h2 className="text-4xl font-bold text-green-800 mb-4">About Us</h2> 
+
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto"> 
+
+            Custom Swing is dedicated to revolutionising golf with tailor-made gear designed to optimise your game. Every product is crafted with precision and passion for the sport. 
+
+          </p> 
+
+        </section> 
+
+      )} 
+
+ 
+
+      {/* Contact Page */} 
+
+      {page === "contact" && ( 
+
+        <section className="p-10 text-center"> 
+
+          <h2 className="text-4xl font-bold text-green-800 mb-4">Contact Us</h2> 
+
+          <p className="text-lg text-gray-700 mb-4">We’d love to hear from you! Reach out with any questions or custom requests.</p> 
+
+          <form className="max-w-xl mx-auto space-y-4"> 
+
+            <input type="text" placeholder="Your Name" className="w-full p-3 rounded-xl border" /> 
+
+            <input type="email" placeholder="Your Email" className="w-full p-3 rounded-xl border" /> 
+
+            <textarea placeholder="Your Message" className="w-full p-3 rounded-xl border h-32"></textarea> 
+
+            <Button className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-2xl shadow-lg w-full"> 
+
+              Send Message 
+
+            </Button> 
+
+          </form> 
+
+        </section> 
+
+      )} 
+
+    </div> 
+
+  ); 
+
+} 
